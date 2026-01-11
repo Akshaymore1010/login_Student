@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const registrationSchema = mongoose.Schema({
+const registrationSchema = new mongoose.Schema({
     Name: {
         type: String,
     },
@@ -16,6 +16,11 @@ const registrationSchema = mongoose.Schema({
     },
     role: {
         type: String,
+        enum: ["student", "teacher"]
+    },
+    RowStatus: {
+        type: Number,
+        default: 0
     }
 })
 
