@@ -5,10 +5,19 @@ import MarksModel from "./MarksModel.js";
 export const addMarks = async (req, res) => {
 
     try {
-        const { math, eng, hindi, marathi, sci, drwaing } = req.body
+        const { math, eng, hindi, marathi, sci, drawing } = req.body
         const { StudentID } = req.params;
-        const user = await registrationModel.findById(StudentID);
-        if (!user || user.role !== "student") {
+        const present = await MarksModel.findOne({ StudentID: StudentID });
+        const stud = await registrationModel.findById(StudentID);
+
+        if(req.user.role!=="teacher"){
+            return res.status(400).json({
+                success: true,
+                message: "only teachers can add marks!"
+
+            }) 
+        }
+        if (!stud || stud.role !== "student") {
             return res.status(400).json({
                 message: "Student Not Found!"
             });
@@ -20,16 +29,17 @@ export const addMarks = async (req, res) => {
             Marathi: marathi,
             Science: sci,
             Hindi: hindi,
-            Drawing: drwaing
+            Drawing: drawing,
+            addedBy: req.user.id
         })
         await addMarks.save();
 
         return res.status(200).json({
             success: true,
-            message: "marks added is succefully!"
+            message: "marks added is succefully!",
+            addMarks
 
         })
-
 
     } catch (error) {
         return res.status(500).json({
