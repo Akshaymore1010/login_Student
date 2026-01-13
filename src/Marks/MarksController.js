@@ -12,15 +12,14 @@ export const addMarks = async (req, res) => {
 
         if(req.user.role!=="teacher"){
             return res.status(400).json({
-                success: true,
+                success: false,
                 message: "only teachers can add marks!"
 
             }) 
         }
-
         if (present) {
             return res.status(400).json({
-                success: true,
+                success: false,
                 message: "marks already added!"
 
             })
