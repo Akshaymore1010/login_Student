@@ -17,6 +17,14 @@ export const addMarks = async (req, res) => {
 
             }) 
         }
+
+        if (present) {
+            return res.status(400).json({
+                success: true,
+                message: "marks already added!"
+
+            })
+        }
         if (!stud || stud.role !== "student") {
             return res.status(400).json({
                 message: "Student Not Found!"
