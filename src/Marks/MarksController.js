@@ -5,7 +5,7 @@ import MarksModel from "./MarksModel.js";
 export const addMarks = async (req, res) => {
 
     try {
-        const { math, eng, hindi, marathi, sci, drwaing } = req.body
+        const { math, eng, hindi, marathi, sci, drawing } = req.body
         const { StudentID } = req.params;
         const exsting = await MarksModel.findOne({ StudentID: StudentID });
         if (exsting) {
@@ -27,7 +27,8 @@ export const addMarks = async (req, res) => {
             Marathi: marathi,
             Science: sci,
             Hindi: hindi,
-            Drawing: drwaing
+            Drawing: drawing,
+            addedBy: req.user.id
         })
         await addMarks.save();
 
@@ -37,7 +38,6 @@ export const addMarks = async (req, res) => {
             data: addMarks
 
         })
-
 
     } catch (error) {
         return res.status(500).json({

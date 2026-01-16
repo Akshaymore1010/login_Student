@@ -2,9 +2,9 @@ import express from "express";
 const router = express.Router();
 
 import UserRoutes from './src/Registartion/RegistartionRoutes.js'
-router.use("/api", UserRoutes)
+router.use("/Register", UserRoutes)
 
 import MarksRoutes from "./src/Marks/MarksRoutes.js"
-router.use('/test', MarksRoutes)
+router.use('/marks', MarksRoutes)
 
 export default router;

@@ -35,6 +35,11 @@ const marksSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
+    addedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "registrationModel",
+        required: true
+    },
     RowStatus: {
         type: Number,
         default: 0
