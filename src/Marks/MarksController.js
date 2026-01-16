@@ -7,6 +7,13 @@ export const addMarks = async (req, res) => {
     try {
         const { math, eng, hindi, marathi, sci, drwaing } = req.body
         const { StudentID } = req.params;
+        const exsting = await MarksModel.findOne({ StudentID: StudentID });
+        if (exsting) {
+            return res.status(401).json({
+                success: false,
+                message: "Marks allready added!"
+            })
+        }
         const user = await registrationModel.findById(StudentID);
         if (!user || user.role !== "student") {
             return res.status(400).json({
@@ -26,7 +33,8 @@ export const addMarks = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: "marks added is succefully!"
+            message: "marks added is succefully!",
+            data: addMarks
 
         })
 
