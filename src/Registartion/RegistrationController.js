@@ -1,6 +1,7 @@
 import registrationModel from "./RegistrationModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 
 
@@ -197,6 +198,62 @@ export const Login = async (req, res) => {
         });
     }
 }
+export const logout = (req, res) => {
+    const token = req.cookies?.token;
+    if (token) {
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(`User logout${decode.role}`);
+
+    } else {
+        console.log("Invalide Token!");
+
+    }
+    res.clearCookie("token", {
+        httpOnly: true,
+        samesite: "strict",
+
+    });
+    return res.status(200).json({
+        success: true,
+        message: "logout Succefully!",
+
+
+    });
+}
+
+export const forgetpassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await registrationModel.findOne({ email });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "user not found for this email!"
+            })
+        }
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(resetToken)
+            .digest("hex")
+
+        user.resetpasswordToken = hashedToken;
+        user.restpasswordexpiry = Date.now() + 10 * 60 * 1000;
+
+        await user.save({ validateBeforeSave: false });
+        const resetURL = `${req.protocol}://${req.get("host")}/reset-password/${resetToken}`;
+
+
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+    }
+
+}
+
 
 
 

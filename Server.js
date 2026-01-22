@@ -7,6 +7,9 @@ import mongoose from "mongoose";
 import router from "./index.js";
 const app = express();
 
+import cookieParser from "cookie-parser";
+app.use(cookieParser());
+
 app.use(express.json());
 app.use(router);
 
