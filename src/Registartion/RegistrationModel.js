@@ -21,6 +21,12 @@ const registrationSchema = new mongoose.Schema({
     RowStatus: {
         type: Number,
         default: 0
+    },
+    token: {
+        type: String
+    },
+    expiry: {
+        type: Date
     }
 })
 

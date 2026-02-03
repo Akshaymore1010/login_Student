@@ -5,6 +5,7 @@ import crypto from "crypto";
 
 
 
+
 export const addUser = async (req, res) => {
     try {
         const { Name, email, username, password, role } = req.body;
@@ -221,29 +222,88 @@ export const logout = (req, res) => {
     });
 }
 
+
 export const forgetpassword = async (req, res) => {
     try {
         const { email } = req.body;
+
         const user = await registrationModel.findOne({ email });
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 success: false,
-                message: "user not found for this email!"
-            })
+                message: "User not found"
+            });
         }
+
         const resetToken = crypto.randomBytes(32).toString("hex");
-        const hashedToken = crypto
+
+        user.token = crypto
             .createHash("sha256")
             .update(resetToken)
-            .digest("hex")
+            .digest("hex");
 
-        user.resetpasswordToken = hashedToken;
-        user.restpasswordexpiry = Date.now() + 10 * 60 * 1000;
+        user.expiry = Date.now() + 10 * 60 * 1000;
 
-        await user.save({ validateBeforeSave: false });
-        const resetURL = `${req.protocol}://${req.get("host")}/reset-password/${resetToken}`;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Reset token generated",
+            resetToken
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error"
+        });
+    }
+};
 
 
+export const resetpassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+        const hashToken = crypto
+            .createHash("sha256")
+            .update(token)
+            .digest("hex");
+
+        const user = await registrationModel.findOne({
+            token: hashToken,
+            expiry: { $gt: Date.now() }
+
+        });
+        console.log("User :", user);
+
+        // console.log("EMAIL:", email);
+        // console.log("RAW TOKEN:", token);
+        // console.log("HASHED TOKEN:", hashToken);
+
+        if (!user) {
+            return res.status(400).json({
+                suceess: false,
+                message: "user not found!"
+            })
+        }
+        const hashpassword = await bcrypt.hash(newPassword, 10);
+        console.log(hashpassword);
+
+        user.password = hashpassword;
+
+        // user.token = undefined;
+        // user.expiry = undefined;
+
+        const data = await user.save();
+        console.log(data);
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successful. You can login now.",
+            result: data
+
+        });
 
     } catch (error) {
         res.status(500).json({
