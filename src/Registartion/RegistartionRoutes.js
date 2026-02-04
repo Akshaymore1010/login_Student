@@ -8,7 +8,7 @@ router.delete("/removie/:id", DeleteUser);
 router.post("/login", Login);
 router.post("/logout", logout);
 router.post("/forget", forgetpassword);
-router.post("/reset-password/:token", resetpassword);
+router.post("/reset-password", resetpassword);
 
 
 

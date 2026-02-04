@@ -16,7 +16,7 @@ const registrationSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["student", "teacher"]
+        // enum: ["student", "teacher"]
     },
     RowStatus: {
         type: Number,
@@ -24,6 +24,9 @@ const registrationSchema = new mongoose.Schema({
     },
     token: {
         type: String
+    },
+    otp: {
+        type: Number
     },
     expiry: {
         type: Date
