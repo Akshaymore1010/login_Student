@@ -10,12 +10,7 @@ export const addUser = async (req, res) => {
     try {
         const { Name, email, username, password, role } = req.body;
         console.log(req.body);
-        // if (!["student", "teacher"].includes(role)) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: "Invalid role"
-        //     })
-        // }
+
 
         const exstinguser = await registrationModel.findOne({ userName: username }, { email: email });
         if (exstinguser) {
@@ -223,98 +218,168 @@ export const logout = (req, res) => {
 }
 
 
+// export const forgetpassword = async (req, res) => {
+//     try {
+//         const { email } = req.body;
+
+//         const user = await registrationModel.findOne({ email });
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "User not found"
+//             });
+//         }
+
+//         const resetToken = crypto.randomBytes(32).toString("hex");
+
+//         user.token = crypto
+//             .createHash("sha256")
+//             .update(resetToken)
+//             .digest("hex");
+
+//         user.expiry = Date.now() + 10 * 60 * 1000;
+
+//         await user.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Reset token generated",
+//             resetToken
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: "Server Error"
+//         });
+//     }
+// };
+
+
+// export const resetpassword = async (req, res) => {
+//     try {
+//         const { token } = req.params;
+//         const { newPassword } = req.body;
+//         const hashToken = crypto
+//             .createHash("sha256")
+//             .update(token)
+//             .digest("hex");
+
+//         const user = await registrationModel.findOne({
+//             token: hashToken,
+//             expiry: { $gt: Date.now() }
+
+//         });
+//         console.log("User :", user);
+
+//         // console.log("EMAIL:", email);
+//         // console.log("RAW TOKEN:", token);
+//         // console.log("HASHED TOKEN:", hashToken);
+
+//         if (!user) {
+//             return res.status(400).json({
+//                 suceess: false,
+//                 message: "user not found!"
+//             })
+//         }
+//         const hashpassword = await bcrypt.hash(newPassword, 10);
+//         console.log(hashpassword);
+
+//         user.password = hashpassword;
+
+//         // user.token = undefined;
+//         // user.expiry = undefined;
+
+//         const data = await user.save();
+//         console.log(data);
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Password reset successful. You can login now.",
+//             result: data
+
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: "Server Error"
+//         });
+//     }
+
+// }
+
+
 export const forgetpassword = async (req, res) => {
     try {
         const { email } = req.body;
-
         const user = await registrationModel.findOne({ email });
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
+            console.log("user not found!")
         }
-
-        const resetToken = crypto.randomBytes(32).toString("hex");
-
-        user.token = crypto
-            .createHash("sha256")
-            .update(resetToken)
-            .digest("hex");
-
-        user.expiry = Date.now() + 10 * 60 * 1000;
-
-        await user.save();
-
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        user.otp = otp;
+        user.expiry = Date.now() + 10 * 60 * 10000
+        const data = await user.save();
+        console.log("otp", otp);
         res.status(200).json({
             success: true,
-            message: "Reset token generated",
-            resetToken
-        });
-
+            message: "otp send succesfully"
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: "Server Error"
-        });
+            message: "Internal Server Error",
+            error: error.message
+        })
     }
-};
-
+}
 
 export const resetpassword = async (req, res) => {
     try {
-        const { token } = req.params;
-        const { newPassword } = req.body;
-        const hashToken = crypto
-            .createHash("sha256")
-            .update(token)
-            .digest("hex");
+        const { email, otp, newpassword } = req.body;
+
 
         const user = await registrationModel.findOne({
-            token: hashToken,
-            expiry: { $gt: Date.now() }
-
+            email: email,
+            otp: otp,
+            expiry: {
+                $gt: Date.now()
+            }
         });
-        console.log("User :", user);
-
-        // console.log("EMAIL:", email);
-        // console.log("RAW TOKEN:", token);
-        // console.log("HASHED TOKEN:", hashToken);
+        console.log("REQUEST BODY:", req.body);
+        console.log("Current Time:", Date.now());
+        console.log("USER FROM DB:", user);
 
         if (!user) {
+            console.log("invalide Otp!")
             return res.status(400).json({
-                suceess: false,
-                message: "user not found!"
+                success: false,
+                message: "Invalide Otp!"
             })
         }
-        const hashpassword = await bcrypt.hash(newPassword, 10);
-        console.log(hashpassword);
 
+        const hashpassword = await bcrypt.hash(newpassword, 10);
         user.password = hashpassword;
+        user.otp = undefined;
+        user.expiry = undefined;
 
-        // user.token = undefined;
-        // user.expiry = undefined;
+        const data = await user.save()
 
-        const data = await user.save();
-        console.log(data);
-
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Password reset successful. You can login now.",
             result: data
-
         });
+
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            message: "Server Error"
-        });
+            message: "Internal Server Error",
+            error: error.message
+        })
     }
 
 }
-
-
-
-
 
